@@ -93,6 +93,45 @@
             margin: 0;
             overflow: hidden;
         }
+
+        /* 优化手机显示 */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .glass-container {
+                padding: 1rem;
+                border-radius: 10px;
+            }
+
+            .neon-button {
+                padding: 8px 20px;
+                font-size: 0.9rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .input-group > input {
+                width: 100%;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            table th,
+            table td {
+                padding: 0.5rem;
+            }
+
+            .batch-delete {
+                margin: 1rem 0;
+            }
+        }
     </style>
 </head>
 
@@ -325,4 +364,5 @@
         document.getElementById('recitationCount').value = selectedSettings.count;
     </script>
 </body>
+
 </html>
