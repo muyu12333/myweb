@@ -132,6 +132,29 @@
                 margin: 1rem 0;
             }
         }
+        /* 现有样式保持不变 */
+
+@media (max-width: 768px) {
+    /* 针对手机等小屏幕的样式 */
+    .input-group {
+        flex-direction: column; /* 使两个输入框垂直显示 */
+        gap: 1rem; /* 调整元素之间的间距 */
+    }
+
+    .input-group > * {
+        width: 100%; /* 确保输入框和按钮在小屏幕上占据整个宽度 */
+        margin-bottom: 1rem; /* 调整底部间距 */
+    }
+
+    .neon-button {
+        padding: 8px 20px; /* 调整按钮的内边距 */
+        font-size: 0.9rem; /* 调整按钮的字体大小 */
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.75rem; /* 调整小按钮的内边距 */
+    }
+}
     </style>
 </head>
 
