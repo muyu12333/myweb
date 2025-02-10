@@ -125,6 +125,27 @@
             font-size: 1.2rem;
             color: #666;
         }
+
+        @media (max-width: 576px) {
+            .recite-card {
+                padding: 1rem;
+                border-radius: 10px;
+            }
+
+            .meaning-text {
+                font-size: 1.2rem;
+            }
+
+            .answer-input {
+                font-size: 1rem;
+            }
+
+            .navigation-button,
+            .action-button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 
@@ -270,9 +291,14 @@
                     ${encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)]}
                 </div>
                 <div class="mt-4">
-                    <button class="btn btn-success btn-lg" onclick="window.location.href='index.html'">返回主页</button>
+                    <button class="btn btn-success btn-lg" onclick="restartRecitation()">重新开始</button>
                 </div>
             `;
+        }
+
+        // 重新开始背诵
+        function restartRecitation() {
+            location.reload();
         }
 
         // 初始化
