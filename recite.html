@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>背诵模式</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .recite-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        #progress-bar {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        #progress {
+            height: 100%;
+            background: #4a90e2;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .meaning-text {
+            font-size: 1.5rem;
+            color: #333;
+            margin: 2rem 0;
+            min-height: 80px;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .answer-input:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 10px rgba(74, 144, 226, 0.2);
+        }
+
+        .result-message {
+            font-size: 1.2rem;
+            margin: 1rem 0;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .correct {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .wrong {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .navigation-buttons {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .navigation-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .button-group {
+            margin-top: 2rem;
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .action-button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .action-button:hover,
+        .navigation-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .score-board {
+            margin-top: 2rem;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .encouragement {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="recite-card" id="recite-card">
+        <h2 class="mb-4">背诵模式 📖</h2>
+        <div id="progress-bar">
+            <div id="progress"></div>
+        </div>
+
+        <div class="meaning-text" id="meaning-text"></div>
+        <div class="current-word" id="current-index"></div>
+
+        <input type="text" class="answer-input" id="answer-input" placeholder="输入对应的单词">
+
+        <div class="result-message" id="result-message"></div>
+
+        <div class="button-group">
+            <button class="action-button btn-primary" onclick="checkAnswer()">检查答案</button>
+            <button class="action-button btn-warning" onclick="showAnswer()">显示答案</button>
+        </div>
+
+        <div class="navigation-buttons">
+            <button class="navigation-button btn-secondary" onclick="previousWord()" disabled id="prev-button">
+                &lt; 上一个
+            </button>
+
+            <button class="navigation-button btn-secondary" onclick="nextWord()" id="next-button">
+                下一个 &gt;
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let originalWords = JSON.parse(localStorage.getItem('wordList')) || [];
+        let recitationMode = localStorage.getItem('recitationMode') || '2';
+        let recitationCount = parseInt(localStorage.getItem('recitationCount') || 20);
+        let words = [];
+        let currentIndex = 0;
+        let correctCount = 0;
+        let progressIndex = 0;
+
+        // 初始化单词列表
+        if (recitationMode === '2') {
+            words = [...originalWords].sort(() => Math.random() - 0.5);
+        } else {
+            words = [...originalWords];
+        }
+        words = words.slice(0, recitationCount);
+
+        // 更新进度条
+        function updateProgress() {
+            const progress = (progressIndex / words.length) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+        }
+
+        // 显示当前单词
+        function showCurrentWord() {
+            if (words.length === 0) return;
+
+            const nextButton = document.getElementById('next-button');
+            const isLastWord = currentIndex === words.length - 1;
+
+            // 更新按钮状态
+            nextButton.textContent = isLastWord ? '提交结果' : '下一个 >';
+            nextButton.onclick = isLastWord ? showFinalScore : nextWord;
+
+            document.getElementById('meaning-text').textContent = words[currentIndex].meaning;
+            document.getElementById('current-index').textContent = `(${currentIndex + 1}/${words.length})`;
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').disabled = false;
+            document.getElementById('result-message').className = '';
+            document.getElementById('result-message').textContent = '';
+
+            document.getElementById('prev-button').disabled = currentIndex === 0;
+            updateProgress();
+        }
+
+        // 上一个单词
+        function previousWord() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                progressIndex = currentIndex;
+                showCurrentWord();
+            }
+        }
+
+        // 下一个单词
+        function nextWord() {
+            if (currentIndex < words.length - 1) {
+                currentIndex++;
+                progressIndex = currentIndex;
+                showCurrentWord();
+            }
+        }
+
+        // 检查答案
+        function checkAnswer() {
+            const input = document.getElementById('answer-input');
+            input.disabled = true;
+
+            const userAnswer = input.value.trim().toLowerCase();
+            const correctAnswer = words[currentIndex].word.toLowerCase();
+            const resultDiv = document.getElementById('result-message');
+
+            if (userAnswer === correctAnswer) {
+                resultDiv.className = 'result-message correct';
+                resultDiv.innerHTML = '✅ 正确！';
+                correctCount++;
+            } else {
+                resultDiv.className = 'result-message wrong';
+                resultDiv.innerHTML = '❌ 错误，请再试一次';
+            }
+        }
+
+        // 显示答案
+        function showAnswer() {
+            const input = document.getElementById('answer-input');
+            input.disabled = true;
+
+            const resultDiv = document.getElementById('result-message');
+            resultDiv.className = 'result-message wrong';
+            resultDiv.innerHTML = `正确答案：<strong>${words[currentIndex].word}</strong>`;
+        }
+
+        // 显示最终成绩
+        function showFinalScore() {
+            const score = Math.round((correctCount / words.length) * 100);
+            const encouragementMessages = [
+                '🌱 种一棵树最好的时间是十年前，其次是现在！',
+                '🚀 你已经超越了昨天的自己！',
+                '🎯 精准记忆需要反复练习，继续保持！',
+                '💡 每个错误都是进步的机会！'
+            ];
+
+            document.getElementById('recite-card').innerHTML = `
+                <h2 class="mb-4">背诵完成 🎉</h2>
+                <div class="score-board">
+                    <div style="font-size:2.5rem">${score}%</div>
+                    <div class="mt-3">正确单词数：${correctCount}/${words.length}</div>
+                </div>
+                <div class="encouragement mt-4">
+                    ${encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)]}
+                </div>
+                <div class="mt-4">
+                    <button class="btn btn-success btn-lg" onclick="window.location.href='index.html'">返回主页</button>
+                </div>
+            `;
+        }
+
+        // 初始化
+        if (words.length === 0) {
+            document.getElementById('recite-card').innerHTML = `
+                <div class="alert alert-warning">请先添加单词</div>
+            `;
+        } else {
+            progressIndex = 0;
+            showCurrentWord();
+        }
+
+        // 键盘支持
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') checkAnswer();
+        });
+    </script>
+</body>
+
+</html>
