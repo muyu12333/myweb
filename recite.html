@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +13,7 @@
             align-items: center;
             justify-content: center;
             padding: 1rem;
+            transition: background 0.3s ease;
         }
 
         .recite-card {
@@ -24,6 +24,13 @@
             width: 90%;
             max-width: 500px;
             text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .recite-card.hidden {
+            transform: scale(0.8);
+            opacity: 0;
+            pointer-events: none;
         }
 
         #progress-bar {
@@ -45,6 +52,13 @@
             color: #333;
             margin: 2rem 0;
             min-height: 80px;
+            transition: color 0.3s ease;
+        }
+
+        .current-word {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: #6c5ce7;
         }
 
         .answer-input {
@@ -54,7 +68,7 @@
             border-radius: 10px;
             font-size: 1.2rem;
             margin: 1rem 0;
-            transition: all 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .answer-input:focus {
@@ -67,6 +81,7 @@
             margin: 1rem 0;
             padding: 10px;
             border-radius: 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .correct {
@@ -93,6 +108,11 @@
             transition: all 0.3s ease;
         }
 
+        .navigation-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
         .button-group {
             margin-top: 2rem;
             display: grid;
@@ -108,8 +128,7 @@
             transition: all 0.3s ease;
         }
 
-        .action-button:hover,
-        .navigation-button:hover {
+        .action-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
@@ -118,6 +137,7 @@
             margin-top: 2rem;
             font-size: 1.5rem;
             color: #333;
+            transition: color 0.3s ease;
         }
 
         .encouragement {
@@ -126,6 +146,7 @@
             color: #666;
         }
 
+        /* 小屏幕适配 */
         @media (max-width: 576px) {
             .recite-card {
                 padding: 1rem;
@@ -140,15 +161,26 @@
                 font-size: 1rem;
             }
 
-            .navigation-button,
+            .navigation-buttons {
+                flex-direction: column;
+            }
+
+            .navigation-button {
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
             .action-button {
-                padding: 8px 16px;
-                font-size: 0.9rem;
+                width: 100%;
+                margin: 0.5rem 0;
             }
         }
     </style>
 </head>
-
 <body>
     <div class="recite-card" id="recite-card">
         <h2 class="mb-4">背诵模式 📖</h2>
@@ -181,12 +213,15 @@
 
     <script>
         let originalWords = JSON.parse(localStorage.getItem('wordList')) || [];
+        console.log("加载的单词数据：", originalWords); // 调试日志
+
         let recitationMode = localStorage.getItem('recitationMode') || '2';
         let recitationCount = parseInt(localStorage.getItem('recitationCount') || 20);
         let words = [];
         let currentIndex = 0;
         let correctCount = 0;
         let progressIndex = 0;
+        let wordResults = []; // 添加数组记录单词正确与否
 
         // 初始化单词列表
         if (recitationMode === '2') {
@@ -195,6 +230,7 @@
             words = [...originalWords];
         }
         words = words.slice(0, recitationCount);
+        console.log("初始化单词列表：", words); // 调试日志
 
         // 更新进度条
         function updateProgress() {
@@ -251,14 +287,19 @@
             const correctAnswer = words[currentIndex].word.toLowerCase();
             const resultDiv = document.getElementById('result-message');
 
+            let isCorrect = false;
             if (userAnswer === correctAnswer) {
                 resultDiv.className = 'result-message correct';
                 resultDiv.innerHTML = '✅ 正确！';
                 correctCount++;
+                isCorrect = true;
             } else {
                 resultDiv.className = 'result-message wrong';
                 resultDiv.innerHTML = '❌ 错误，请再试一次';
+                isCorrect = false;
             }
+
+            wordResults[currentIndex] = isCorrect; // 更新单词正确与否记录
         }
 
         // 显示答案
@@ -281,6 +322,16 @@
                 '💡 每个错误都是进步的机会！'
             ];
 
+            // 创建单词列表
+            let wordListHTML = '<ul class="list-group">';
+            words.forEach((word, index) => {
+                const isCorrect = wordResults[index]; // 使用记录的正确与否
+                wordListHTML += `<li class="list-group-item ${isCorrect ? 'list-group-item-success' : 'list-group-item-danger'}">
+                    <strong>${word.word}</strong>: ${word.meaning} - ${isCorrect ? '正确' : '错误'}
+                </li>`;
+            });
+            wordListHTML += '</ul>';
+
             document.getElementById('recite-card').innerHTML = `
                 <h2 class="mb-4">背诵完成 🎉</h2>
                 <div class="score-board">
@@ -291,7 +342,11 @@
                     ${encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)]}
                 </div>
                 <div class="mt-4">
-                    <button class="btn btn-success btn-lg" onclick="restartRecitation()">重新开始</button>
+                    <h5>单词列表</h5>
+                    ${wordListHTML}
+                </div>
+                <div class="mt-4">
+                    <button class="btn btn-primary btn-lg" onclick="restartRecitation()">重新开始</button>
                 </div>
             `;
         }
@@ -317,5 +372,4 @@
         });
     </script>
 </body>
-
 </html>
