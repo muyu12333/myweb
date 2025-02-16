@@ -133,25 +133,85 @@
                 margin-bottom: 1rem;
             }
         }
-        /* 在现有媒体查询中增强响应式 */
-        @media (max-width: 576px) {
-            .input-group {
-                flex-wrap: wrap;
-            }
-            .input-group input {
-                width: 100% !important;
-                margin-bottom: 8px;
-            }
-            .neon-button {
-                padding: 8px 15px;
-                font-size: 0.9rem;
-            }
-            .table td, .table th {
-                padding: 0.5rem;
-                font-size: 0.9rem;
-            }
+    /* 在现有媒体查询中增强响应式 */
+    @media (max-width: 576px) {
+        .input-group {
+            flex-wrap: wrap;
         }
-    </style>
+        .input-group input {
+            width: 100% !important;
+            margin-bottom: 8px;
+        }
+        .neon-button {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+        .table td, .table th {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    .card {
+        background: rgba(255,255,255,0.8);
+        transition: background 0.3s ease;
+    }
+    .dark-mode .card {
+        background: rgba(45, 52, 54, 0.8);
+        color: #fff;
+    }
+
+    .form-control, .form-select {
+        background: rgba(255,255,255,0.9) !important;
+    }
+    .dark-mode .form-control, 
+    .dark-mode .form-select {
+        background: rgba(45, 52, 54, 0.9) !important;
+        color: #fff !important;
+    }
+
+    /* 白天模式下的样式 */
+    .input-group input {
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #000 !important;
+    }
+
+    .table {
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #000 !important;
+    }
+
+    /* 夜间模式下的样式 */
+    .dark-mode .input-group input {
+        background: rgba(255, 255, 255, 0.1) !important; 
+        color: #fff !important; 
+    }
+
+    .dark-mode .table {
+        background: rgba(255, 255, 255, 0.1) !important; 
+        color: #fff !important; 
+    }
+
+    .dark-mode .table th,
+    .dark-mode .table td {
+        color: #fff !important; 
+    }
+
+    .dark-mode .form-control, 
+    .dark-mode .form-select {
+        background: rgba(45, 52, 54, 0.9) !important;
+        color: #fff !important; 
+    }
+
+    .pagination .btn-secondary {
+        background-color: var(--secondary);
+        border-color: var(--secondary);
+    }
+    .dark-mode .pagination .btn-secondary {
+        background-color: #3a3f44;
+        border-color: #3a3f44;
+    }
+</style>
 </head>
 <body>
     <!-- 悬浮控制按钮 -->
