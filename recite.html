@@ -193,7 +193,7 @@
             <span id="current-word-text"></span>
             
         </div>
-        <div>
+        <div id="speak-button-container">
             <button class="action-button btn-info" onclick="speakWord()">🔊 </button>
         </div>
         <input type="text" class="answer-input" id="answer-input" placeholder="输入对应的单词">
@@ -292,6 +292,18 @@
             utterance.lang = 'en-US';
             synth.speak(utterance);
         }
+
+        // 添加检测移动设备的函数
+        function isMobileDevice() {
+            return /Mobi|Android/i.test(navigator.userAgent);
+        }
+
+        // 初始化时隐藏或显示发音按钮
+        document.addEventListener('DOMContentLoaded', () => {
+            if (isMobileDevice()) {
+                document.getElementById('speak-button-container').style.display = 'none';
+            }
+        });
 
         // 修改 checkAnswer 函数以包含发音功能
         function checkAnswer() {
