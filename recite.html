@@ -295,7 +295,13 @@
 
         // 修改 checkAnswer 函数以包含发音功能
         function checkAnswer() {
-            speakWord();  // 添加发音
+            // 检查是否为移动设备
+            const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+            if (!isMobile) {
+                speakWord();  // 添加发音
+            }
+
             const input = document.getElementById('answer-input');
             input.disabled = true;
 
